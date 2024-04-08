@@ -1,0 +1,273 @@
+﻿@model Task_Model_validate.Models.StdModel
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/7.0.2/default/default-main.css" />
+<link rel="stylesheet" href="https://unpkg.com/@@progress/kendo-font-icons/dist/index.css" />
+<script src="https://kendo.cdn.telerik.com/2023.3.1114/js/jszip.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2023.2.829/mjs/kendo.all.js" type="module"></script>
+
+
+ <button id="addButton" class="btn btn-success">Add Employee</button>
+<div id="modal" class="modal" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Add/Edit Employee</h5>
+                <button type="button" class="close" id="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="StdForm" method="post">
+                    <div class="form-group">
+
+                        <input type="hidden" asp-for="Id" class="form-control" id="Id" value=0>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Name">Name</label>
+                        <input asp-for="Name" class="form-control" id="Name">
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Email">Email</label>
+                        <input asp-for="Email" class="form-control" id="Email">
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Mobile">Mobile</label>
+                        <input class="form-control" id="Mobile" asp-for="Mobile">
+                        <span asp-validation-for="Mobile" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="City">City</label>
+                        <input class ="form-control" id="City" asp-for="City">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label " for="form3Example1c">Course</label>
+                        <select class="form-control" name="Course" id="Course">
+                            <option value="" selected disabled>SELECT</option>
+
+                            <option value="B.tech">B.tech</option>
+                            <option value="BCA">BCA</option>
+
+                            <option value="B.sc">B.sc</option>
+                            <option value="M.tech">M.tech</option>
+                            <option value="MCA">MCA</option>
+
+                            
+
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary" id="saveButton">Save</button>
+                        <button type="button" class="btn btn-secondary" id="closeButton" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<div id="confirmationModal" class="modal" tabindex="-1" role="dialog" data-bs-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this item?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteButton">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="grid"></div>
+
+<script>
+    $(document).ready(function () {
+        
+        let getCourseColor = (data) => {
+            console.log(data)
+            var color;
+            if (data.course === "BCA") {
+                color = "#C1D8C3";
+            }
+            else if (data.course === "B.tech") {
+                color = "Lightgreen";
+            }
+            else if (data.course === "B.sc") {
+                color = "#F9E8D9";
+            }
+            else if (data.course === "M.sc") {
+                color = "#DC84F3";
+            }
+            else if (data.course === "MCA") {
+                color = "#C499F3";
+            }
+            else {
+                color = "#AC7D88";
+            }
+            return { style: `background-color: ${color}` }
+        }
+        var grid = $("#grid").kendoGrid({
+            toolbar: ["excel", "PDF", "search"],
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Student/ReadDta/",
+                        dataType: "json"
+                    },
+                },
+                schema: {
+                    model: {
+
+                        id: "id",
+                        fields: {
+                            id: { editable: false },
+                        }
+                    }
+                },
+                pageSize: 10,
+            },
+            pageable: true,
+
+            columns: [
+                // {field: "id", title: "Id" },
+                { field: "name", title: "Name" },
+                { field: "email", title: "Email" },
+                { field: "mobile", title: "Mobile" },
+                { field: "city", title: "City" },
+                {
+                  field: "course", title: "Course", attributes: getCourseColor
+                    
+                },
+                { field: "CustomColumn", title: "Edit", template: "<a class='k-button btn btn-warning editButton' href='javascript:void(0)'>Edit</a>" },
+                { field: "CustomColumn", title: "Delete", template: "<a class='k-button btn btn-danger deleteButton' href='javascript:void(0)'>Delete</a>" },
+                // { title: "Actions", command: ["edit", "destroy"] }
+            
+            ],
+        }).data("kendoGrid");
+
+
+
+
+        $("#addButton").click(function () {
+            $("#StdForm")[0].reset();
+            $("#modalTitle").text("Add Employee");
+            $("#modal").modal("show");
+        });
+        $("#close").click(function () {
+
+            $("#modal").modal("hide");
+        });
+        $("#closeButton").click(function () {
+            $("#modal").modal("hide");
+        });
+        $("#grid").on("click", ".editButton", function () {
+            debugger
+            var dataItem = grid.dataItem($(this).closest("tr"));
+            $("#StdForm span").text("");
+            $("#Id").val(dataItem.id);
+            $("#Name").val(dataItem.name);
+
+            $("#Email").val(dataItem.email);
+            $("#Mobile").val(dataItem.mobile);
+            $("#City").val(dataItem.city);
+            $("#Course").val(dataItem.course);
+            $("#modalTitle").text("Edit Employee");
+            $("#modal").modal("show");
+        });
+        $("#grid").on("click", ".deleteButton", function () {
+
+
+            var dataItem = grid.dataItem($(this).closest("tr"));
+            
+
+            // Show the confirmation modal
+            $("#confirmationModal").modal("show");
+
+            // Set up the event handler for the confirm delete button
+            $("#confirmDeleteButton").on("click", function () {
+
+            
+            var del = {Id:dataItem.id}
+            $.ajax({
+                url: "/Student/DeleteList/",
+                type: "POST",
+                data: del,
+                success: function (data) {
+                    grid.dataSource.read();
+                },
+                
+            });
+                $("#confirmationModal").modal("hide");
+
+                // Remove the event handler to avoid multiple executions
+                $("#confirmDeleteButton").off("click");
+            });
+        });
+
+
+
+
+        $("#StdForm").submit(function (e) {
+            debugger
+            var isValid = true;
+            var id = $("#StdForm #Id").val();
+
+            if (id > 0) {
+                console.log("edi");
+                url = "/Student/UpdateList/";
+
+            }
+            else {
+                url = "/Student/CreateList/";
+                console.log("cre");
+            }
+
+            $("#StdForm input").each(function () {
+                console.log("hi");
+                var ref = $(this);
+                if (ref.val() == "" && ref.attr('id') != "City") {
+                    isValid = false;
+                    console.log(ref);
+                }
+
+            })
+
+            if (isValid) {
+                var formData = $("#StdForm").serialize();
+                console.log(formData);
+                $.ajax({
+                    type: "post",
+                    url: url,
+                    data: formData,
+                    success: function (data) {
+                        console.log(data);
+                        $("#modal").modal("hide");
+                        grid.dataSource.read();
+                    }
+                })
+            }
+            else {
+                e.preventDefault();
+            }
+
+        })
+        
+        
+    });
+</script>
+@section Scripts{
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

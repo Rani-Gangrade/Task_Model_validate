@@ -1,0 +1,102 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .popup {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="openPopup">Open Popup</button>
+    <div id="popup" class="popup">
+        <p>This is a popup menu.</p>
+        <button id="closePopup">Close</button>
+    </div>
+
+    <script>
+        const openPopupButton = document.getElementById('openPopup');
+        const closePopupButton = document.getElementById('closePopup');
+        const popup = document.getElementById('popup');
+
+        openPopupButton.addEventListener('click', function (event) {
+            event.stopPropagation();
+            popup.style.display = 'block';
+        });
+
+        closePopupButton.addEventListener('click', function () {
+            popup.style.display = 'none';
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!popup.contains(event.target) && event.target !== openPopupButton) {
+                popup.style.display = 'none';
+            }
+        });
+    </script>
+
+</body>
+</html>
+@* $("#myForm").submit(function (e) {
+
+     var isValid = true;
+     var id = $("#myForm #Id").val();
+
+     if (id > 0) {
+         console.log("edi");
+         url = "/Home/Edit/";
+
+     }
+     else {
+         url = "/Home/Create/";
+         console.log("cre");
+     }
+
+     $("#myForm input").each(function () {
+         console.log("hi");
+         var ref = $(this);
+         if (ref.val() == "") {
+             isValid = false;
+             console.log(ref);
+         }
+
+     })
+
+     if (isValid) {
+         var formData = $("#myForm").serialize();
+         console.log(formData);
+         $.ajax({
+             type: "post",
+             url: url,
+             data: formData,
+             success: function (d) {
+                 console.log(d);
+                 $("#staticBackdrop").modal("hide");
+                 grid.dataSource.read();
+             }
+         })
+     }
+     else {
+         e.preventDefault();
+     }
+
+ }) *@

@@ -1,0 +1,188 @@
+﻿@* @model Task_Model_validate.Models.Std
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/themes/7.0.2/default/default-main.css" />
+<link rel="stylesheet" href="https://unpkg.com/@@progress/kendo-font-icons/dist/index.css" />
+<script src="https://kendo.cdn.telerik.com/2023.3.1114/js/jszip.min.js"></script>
+<script src="https://kendo.cdn.telerik.com/2023.2.829/mjs/kendo.all.js" type="module"></script>
+
+<button id="addButton" class="btn btn-primary">Add Employee</button>
+
+<div id="modal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Add/Edit Employee</h5>
+                <button type="button" class="close" id="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="employeeForm">
+                    <div class="form-group">
+
+                        <input type="hidden" asp-for="Id" class="form-control" id="Id" name="Id">
+                    </div>
+                    <div class="form-group">
+                        <label for="Name">Name</label>
+                        <input type="text" class="form-control" id="Name" name="Name">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Email">Email</label>
+                        <input type="text" class="form-control" id="Email" name="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="Mobile">Mobile</label>
+                        <input type="text" class="form-control" id="Mobile" name="Mobile">
+                    </div>
+                    <div class="form-group">
+                        <label for="City">Department</label>
+                        <input type="text" class="form-control" id="City" name="City">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label " for="form3Example1c"><h6>Country:</h6></label>
+                        <select class="form-control" name="Course" id="Course">
+                            <option value="" selected disabled>SELECT</option>
+
+                            <option value="Greece">Greece</option>
+                            <option value="India">India</option>
+
+                            <option value="Egypt">Egypt</option>
+
+                            <option value="Argentina">Argentina</option>
+
+                            <option value="Australia">Australia</option>
+
+                            <option value="Congo">Congo</option>
+
+                        </select>
+                        <div class="error" id="countryErr"></div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveButton">Save</button>
+                <button type="button" class="btn btn-secondary" id="closeButton" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="grid"></div>
+
+<script>
+    $(document).ready(function () {
+        var grid = $("#grid").kendoGrid({
+            toolbar: [{ name: "create", text: "Add Items" }],
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Emp/GetData/",
+                        dataType: "json"
+                    },
+                    destroy: {
+                        url: "/Emp/Delete/",
+                        dataType: "json"
+                    },
+                },
+                schema: {
+                    model: {
+
+                        id: "id",
+                        fields: {
+                            id: { editable: false },
+                        }
+                    }
+                },
+                pageSize: 10,
+            },
+            pageable: true,
+            columns: [
+                {
+                    field: "id", title: "Id"
+                },
+                { field: "name", title: "Name" },
+                { field: "department", title: "Department" },
+                { title: "Actions", command: ["edit", "destroy"] },
+                { field: "CustomColumn", title: "Is Action", template: "<a class='k-button btn btn-primary editButton' href='javascript:void(0)'>Edit</a>" }
+            ],
+            editable: "popup",
+        }).data("kendoGrid");
+
+
+
+
+
+
+
+
+
+        $("#addButton").click(function () {
+            $("#employeeForm")[0].reset();
+            $("#modalTitle").text("Add Employee");
+            $("#modal").modal("show");
+        });
+        $("#close").click(function () {
+
+            $("#modal").modal("hide");
+        });
+        $("#closeButton").click(function () {
+            $("#modal").modal("hide");
+        });
+        $("#grid").on("click", ".editButton", function () {
+            var dataItem = grid.dataItem($(this).closest("tr"));
+            $("#Id").val(dataItem.id);
+            $("#Name").val(dataItem.name);
+
+            $("#Department").val(dataItem.designation);
+            $("#modalTitle").text("Edit Employee");
+            $("#modal").modal("show");
+        });
+
+        $("#saveButton").click(function () {
+            var formData = $("#employeeForm").serialize();
+
+            var isEdit = $("#employeeForm #id").val() !== "";
+
+            var url = isEdit ? "/Emp/UpdateList/" : "/Emp/CreateList/";
+
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: formData,
+                success: function (data) {
+                    $("#modal").modal("hide");
+                    grid.dataSource.read();
+                    grid.refresh();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+            // $.ajax({
+            //     url: "/Emp/Edit/",
+            //     type: "POST",
+            //     data: formData,
+            //     success: function (data) {
+            //         $("#modal").modal("hide");
+            //         grid.dataSource.read();
+            //         grid.refresh();
+            //     },
+            //     error: function (error) {
+            //         console.log(error);
+            //     }
+            // });
+        });
+        const country = $("#dropDownCoun").val();
+
+        if (country == null) {
+            $("#country").html('*Please Select City').css("color", "red");
+            valid = false;
+        } else {
+
+            $("#country").html('')
+
+        }
+    });
+</script> *@
